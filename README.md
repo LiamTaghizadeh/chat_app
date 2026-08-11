@@ -1,39 +1,235 @@
-# 🗨️ Local Chat Application
+# P2P Chat — چت همتا‌به‌همتا حرفه‌ای
 
-## 📋 Project Overview
+یک مسنجر **Peer-to-Peer** کامل با پایتون و **Tkinter**.
 
-A **Local Chat Application** built with Python that enables real-time messaging between multiple users on the same network. The application features a server-client architecture with a modern graphical interface using CustomTkinter.
+هر کاربر هم‌زمان **سرور و کلاینت** است. نیازی به سرور مرکزی نیست.  
+پشتیبانی از **متن**، **پیام صوتی**، **روم یک‌به‌یک** و **گروه**، ذخیره تاریخچه در هر دو طرف، کار روی `localhost` و اینترنت (با Port Forwarding).
 
-## 🚀 Features
+---
 
-### Core Functionality
-- **Real-time messaging** between multiple clients
-- **User authentication** with unique nicknames
-- **Connection management** (join/leave notifications)
-- **Online user counter**
-- **Timestamped messages**
+## ویژگی‌ها
 
-### Technical Features
-- **TCP Socket communication** for reliable data transfer
-- **Multi-threaded server** handling multiple clients simultaneously
-- **JSON-based message protocol** for structured communication
-- **Modern GUI** with CustomTkinter
-- **Cross-platform compatibility** (Windows, macOS, Linux)
+| قابلیت | توضیح |
+|--------|--------|
+| P2P واقعی | هر نود هم سرور است هم کلاینت |
+| روم مستقیم | چت ۱:۱ با هر همتای متصل |
+| گروه | ساخت گروه و دعوت چند نفر |
+| متن | ارسال و دریافت فوری |
+| ویس | ضبط و ارسال پیام صوتی (WAV) |
+| ذخیره دوطرفه | تاریخچه در SQLite هر دو طرف |
+| تماس‌ها | لیست مخاطبین و آخرین IP:Port |
+| Localhost | تست کامل روی یک ماشین |
+| اینترنت | با Port Forwarding یا تونل |
 
-### User Experience
-- **Dark theme interface** with modern styling
-- **Responsive design** that adapts to window resizing
-- **System notifications** for user events
-- **Message history** with scrollable view
-- **Intuitive login/chat interface**
+---
 
-## 🛠️ Technology Stack
+## پیش‌نیازها
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| **Backend** | Python Socket Programming | Network communication |
-| **Concurrency** | Python Threading | Handle multiple clients |
-| **Frontend** | CustomTkinter | Modern GUI interface |
-| **Data Format** | JSON | Structured message passing |
-| **Packaging** | pip | Dependency management |
+- **Python 3.9+**
+- **Tkinter** (معمولاً همراه پایتون است)
+  - اوبونتو/دبیان: `sudo apt install python3-tk`
+  - فدورا: `sudo dnf install python3-tkinter`
+- **PyAudio** (فقط برای ویس — اختیاری)
 
+```bash
+# ویندوز
+pip install pyaudio
+
+# لینوکس (قبلش portaudio)
+sudo apt install portaudio19-dev python3-pyaudio
+# یا
+pip install pyaudio
+
+# مک
+brew install portaudio
+pip install pyaudio
+```
+
+اگر PyAudio نصب نباشد، برنامه فقط با **متن** کار می‌کند و دکمه ویس غیرفعال می‌شود.
+
+---
+
+## نصب و اجرا
+
+```bash
+# کلون یا کپی پوشه
+cd p2p_chat
+
+# (اختیاری) محیط مجازی
+python -m venv .venv
+# ویندوز:
+.venv\Scripts\activate
+# لینوکس/مک:
+source .venv/bin/activate
+
+# وابستگی ویس (اختیاری)
+pip install -r requirements.txt
+
+# اجرا
+python main.py
+```
+
+در اولین اجرا نام کاربری از شما پرسیده می‌شود.
+
+---
+
+## استفاده سریع
+
+### ۱. تست روی یک کامپیوتر (Localhost)
+
+1. برنامه را **دو بار** باز کنید (دو پنجره).
+2. در هر پنجره پورت متفاوت بگذارید (پیش‌فرض `5050`).
+   - برای تغییر پورت: دکمه «تغییر پورت» → مثلاً یکی `5050` و دیگری `5051` → برنامه را ری‌استارت کنید.
+3. در پنجره دوم:
+   - Host: `127.0.0.1`
+   - Port: `5050` (پورت پنجره اول)
+   - دکمه **اتصال**
+4. بعد از اتصال سبز شدن همتا:
+   - یکی از همتاها را در لیست انتخاب کنید
+   - روی **+ روم مستقیم** بزنید
+5. پیام متنی بفرستید یا ویس ضبط کنید.
+
+### ۲. دو کامپیوتر در یک شبکه محلی (LAN)
+
+1. IP محلی خود را از پنل «اطلاعات من» بردارید (مثلاً `192.168.1.10`).
+2. فایروال را برای پورت انتخابی باز کنید (مثلاً `5050`).
+3. طرف مقابل همان IP و پورت را وارد کند و **اتصال** بزند.
+4. روم بسازید و چت کنید.
+
+### ۳. اینترنت (Port Forwarding)
+
+برای اینکه از خارج از خانه به شما وصل شوند:
+
+#### الف) روی مودم/روتر
+
+1. وارد پنل مودم شوید (معمولاً `192.168.1.1`).
+2. بخش **Port Forwarding** / **Virtual Server** / **NAT**.
+3. یک قانون اضافه کنید:
+   - External Port: `5050` (یا هر پورتی که می‌خواهید)
+   - Internal IP: IP کامپیوتر شما در LAN
+   - Internal Port: همان پورت برنامه
+   - Protocol: TCP
+4. IP عمومی خود را از [ifconfig.me](https://ifconfig.me) یا مشابه پیدا کنید.
+5. طرف مقابل **IP عمومی + پورت** را وارد کند.
+
+#### ب) با تونل (بدون دسترسی به مودم) — توصیه برای تست
+
+```bash
+# با ngrok (بعد از ثبت‌نام و نصب)
+ngrok tcp 5050
+```
+
+خروجی چیزی شبیه این است:
+
+```
+Forwarding  tcp://0.tcp.ngrok.io:12345 -> localhost:5050
+```
+
+طرف مقابل Host را `0.tcp.ngrok.io` و Port را `12345` بگذارد.
+
+ابزارهای مشابه: `cloudflared`, `localtunnel`, `bore`, `playit.gg`.
+
+---
+
+## رابط کاربری
+
+```
+┌────────────┬─────────────────────────────┬──────────────┐
+│  روم‌ها    │      ناحیه چت               │  همتاها      │
+│            │                             │              │
+│ + روم مستقیم│  [حباب‌های پیام]            │ 🟢 Alice     │
+│ + گروه جدید│                             │ ⚪ Bob       │
+│            │                             │              │
+│ 💬 Alice   │                             │ اتصال مستقیم│
+│ 👥 تیم     │  [ورودی متن] [🎙] [ارسال]   │ IP / Port    │
+│            │                             │ [اتصال]      │
+│            │                             │ اطلاعات من   │
+└────────────┴─────────────────────────────┴──────────────┘
+ وضعیت: متصل به ...
+```
+
+---
+
+## معماری فنی
+
+```
+┌─────────────────────────────────────────┐
+│              ChatApp (Tkinter)          │
+│  rooms | messages | peers | connect UI  │
+└──────────────────┬──────────────────────┘
+                   │ callbacks
+┌──────────────────▼──────────────────────┐
+│              PeerNode                   │
+│  • TCP Server (listen 0.0.0.0:port)     │
+│  • TCP Clients (connect to others)      │
+│  • Room membership (mesh)               │
+│  • Broadcast text / voice to room       │
+└───────┬─────────────────┬───────────────┘
+        │                 │
+   ┌────▼────┐       ┌────▼────┐
+   │ Storage │       │  Voice  │
+   │ SQLite  │       │ PyAudio │
+   └─────────┘       └─────────┘
+```
+
+### پروتکل فریم
+
+```
+[4 bytes length (big-endian)][1 byte type][payload]
+
+type 0x01 = JSON (hello, text, room_invite, join, ack, …)
+type 0x02 = Binary voice (WAV bytes)
+```
+
+هر پیام متنی و ویس در **هر دو طرف** داخل `~/.p2p_chat/chat.db` ذخیره می‌شود.  
+فایل‌های ویس در `~/.p2p_chat/voice/`.
+
+---
+
+## ساختار پوشه
+
+```
+p2p_chat/
+├── main.py              # نقطه ورود
+├── requirements.txt
+├── README.md
+├── core/
+│   ├── protocol.py      # فریم‌بندی و انواع پیام
+│   ├── peer.py          # نود P2P (سرور + کلاینت)
+│   ├── storage.py       # SQLite
+│   └── voice.py         # ضبط و پخش
+└── ui/
+    └── app.py           # رابط Tkinter
+```
+
+---
+
+## نکات امنیتی و محدودیت‌ها
+
+- در نسخه فعلی پیام‌ها **رمزنگاری end-to-end** ندارند (روی TCP خام). برای استفاده جدی می‌توان لایه TLS یا Noise Protocol اضافه کرد.
+- NAT سخت (Symmetric NAT) ممکن است اتصال مستقیم را سخت کند؛ در این حالت از تونل (ngrok و مشابه) استفاده کنید.
+- ویس به صورت **پیام صوتی** (record → send) است، نه تماس زنده. تماس زنده نیاز به UDP + jitter buffer دارد و در نسخه‌های بعدی قابل اضافه‌شدن است.
+- فایروال ویندوز/لینوکس باید پورت را اجازه دهد.
+
+---
+
+## عیب‌یابی
+
+| مشکل | راه‌حل |
+|------|--------|
+| ویس کار نمی‌کند | `pip install pyaudio` و درایور میکروفون |
+| اتصال برقرار نمی‌شود | پورت یکسان؟ فایروال؟ IP درست؟ |
+| روی اینترنت وصل نمی‌شود | Port Forwarding یا ngrok |
+| Tkinter پیدا نشد | `sudo apt install python3-tk` |
+| دو پنجره روی یک پورت | پورت‌ها را متفاوت کنید |
+
+---
+
+## مجوز
+
+برای استفاده شخصی و آموزشی آزاد است.  
+در صورت استفاده تجاری یا انتشار، ذکر منبع توصیه می‌شود.
+
+---
+
+**ساخته‌شده با پایتون • بدون سرور مرکزی • کاملاً همتا‌به‌همتا**

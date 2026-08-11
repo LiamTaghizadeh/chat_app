@@ -1,0 +1,14 @@
+# P2P Chat - Professional Peer-to-Peer Messenger
+# Python 3.9+
+
+# Core (stdlib only for networking + GUI)
+# tkinter is included with most Python installs
+
+# Optional but recommended for voice
+pyaudio>=0.2.13
+# Alternative if pyaudio fails to install:
+# sounddevice>=0.4.6
+# numpy>=1.24.0
+
+# Nice-to-have (already often present)
+# cryptography for optional message encryption (stdlib hashlib used by default)
